@@ -100,7 +100,7 @@ export class AsciiWordmarkRenderer {
       width: '100%',
       height: '100%',
       display: 'block',
-      touchAction: 'pan-y',
+      touchAction: 'none',
       userSelect: 'none',
       WebkitUserSelect: 'none',
     })

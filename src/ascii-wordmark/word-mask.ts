@@ -5,7 +5,7 @@ export type WordMask = {
   width: number
   height: number
   /** Hit-test letter ink. `x`/`y` are CSS pixels in the stage. */
-  hitTest: (x: number, y: number) => boolean
+  hitTest: (x: number, y: number, padPx?: number) => boolean
 }
 
 /** Builds an alpha mask of `word` framed like the ASCII wordmark (1024×320 @ ~92%). */
@@ -40,11 +40,12 @@ export function buildWordMask(
   const data = image.data
   const radius = Math.max(2, Math.round(Math.min(w, h) * 0.006))
 
-  const hitTest = (x: number, y: number) => {
+  const hitTest = (x: number, y: number, padPx = 0) => {
     const px = Math.round(x)
     const py = Math.round(y)
-    for (let oy = -radius; oy <= radius; oy++) {
-      for (let ox = -radius; ox <= radius; ox++) {
+    const r = radius + Math.max(0, Math.round(padPx))
+    for (let oy = -r; oy <= r; oy++) {
+      for (let ox = -r; ox <= r; ox++) {
         const sx = px + ox
         const sy = py + oy
         if (sx < 0 || sy < 0 || sx >= w || sy >= h) continue
