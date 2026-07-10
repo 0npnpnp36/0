@@ -213,9 +213,10 @@ function App() {
   const stemsRef = useRef<HoverStems | null>(null)
   const [crosses, setCrosses] = useState<Cross[]>([])
   const [wordMask, setWordMask] = useState<string>('')
-  const [soundOn, setSoundOn] = useState(true)
+  const [soundOn, setSoundOn] = useState(false)
   const [affHot, setAffHot] = useState(false)
   const timersRef = useRef<number[]>([])
+  const wordmarkApiRef = useRef<AsciiWordmarkRenderer | null>(null)
 
   const clearTimers = useCallback(() => {
     timersRef.current.forEach(clearTimeout)
@@ -278,11 +279,13 @@ function App() {
       })
 
       if (!wordmark.mount()) return
+      wordmarkApiRef.current = wordmark
       wordmark.start()
     })()
 
     return () => {
       disposed = true
+      wordmarkApiRef.current = null
       wordmark?.dispose()
     }
   }, [WORD, LOWERCASE_SCALE, WORDMARK_FONT, WORDMARK_VIEW_SCALE])
@@ -343,21 +346,32 @@ function App() {
       setAffHot((prev) => (prev === hot ? prev : hot))
     }
 
+    const driveVisuals = (e: PointerEvent, active: boolean) => {
+      wordmarkApiRef.current?.setScreenPointer(e.clientX, e.clientY, active)
+    }
+
     const onMove = (e: PointerEvent) => {
       if (isTouchLike(e)) {
-        if (pressId === e.pointerId) setHot(sample(e))
+        if (pressId === e.pointerId) {
+          const hot = sample(e)
+          setHot(hot)
+          driveVisuals(e, hot)
+        }
         return
       }
-      setHot(sample(e))
+      const hot = sample(e)
+      setHot(hot)
+      driveVisuals(e, true)
     }
 
     const onDown = (e: PointerEvent) => {
       void stemsRef.current?.ensureRunning()
       if (!isTouchLike(e)) return
-      if (!sample(e)) return
+      const hot = sample(e)
+      if (!hot) return
       pressId = e.pointerId
       setHot(true)
-      stage.setPointerCapture(e.pointerId)
+      driveVisuals(e, true)
       e.preventDefault()
     }
 
@@ -365,14 +379,13 @@ function App() {
       if (pressId !== e.pointerId) return
       pressId = null
       setHot(false)
-      if (stage.hasPointerCapture(e.pointerId)) {
-        stage.releasePointerCapture(e.pointerId)
-      }
+      driveVisuals(e, false)
     }
 
     const onLeave = (e: PointerEvent) => {
       if (isTouchLike(e)) return
       setHot(false)
+      driveVisuals(e, false)
     }
 
     stage.addEventListener('pointermove', onMove)

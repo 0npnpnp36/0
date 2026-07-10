@@ -250,32 +250,51 @@ export class AsciiWordmarkRenderer {
   }
 
   private bindEvents() {
-    const onPointerMove = (e: PointerEvent) => {
+    const projectPointer = (clientX: number, clientY: number) => {
       const r = this.host.getBoundingClientRect()
-
-      const nx = ((e.clientX - r.left) / r.width) * 2 - 1
-      const ny = -(((e.clientY - r.top) / r.height) * 2 - 1)
+      const nx = ((clientX - r.left) / r.width) * 2 - 1
+      const ny = -(((clientY - r.top) / r.height) * 2 - 1)
       const v = new THREE.Vector3(nx, ny, 0.5).unproject(this.camera)
       const dir = v.sub(this.camera.position).normalize()
       const dist = -this.camera.position.z / dir.z
       this.mouse.copy(this.camera.position).add(dir.multiplyScalar(dist))
-
       this.mouseUv.set(
-        (e.clientX - r.left) / r.width,
-        1 - (e.clientY - r.top) / r.height,
+        (clientX - r.left) / r.width,
+        1 - (clientY - r.top) / r.height,
       )
       this.onCard = true
     }
-    const onPointerLeave = () => {
+
+    const clearPointer = () => {
       this.mouse.set(9999, 9999, 0)
       this.mouseUv.set(9999, 9999)
       this.onCard = false
     }
 
+    const onPointerMove = (e: PointerEvent) => {
+      projectPointer(e.clientX, e.clientY)
+    }
+    const onPointerDown = (e: PointerEvent) => {
+      projectPointer(e.clientX, e.clientY)
+    }
+    const onPointerUp = (e: PointerEvent) => {
+      if (e.pointerType === 'touch' || e.pointerType === 'pen') clearPointer()
+    }
+    const onPointerLeave = (e: PointerEvent) => {
+      if (e.pointerType === 'touch' || e.pointerType === 'pen') return
+      clearPointer()
+    }
+
     this.host.addEventListener('pointermove', onPointerMove)
+    this.host.addEventListener('pointerdown', onPointerDown)
+    this.host.addEventListener('pointerup', onPointerUp)
+    this.host.addEventListener('pointercancel', onPointerUp)
     this.host.addEventListener('pointerleave', onPointerLeave)
     this.cleanupFns.push(() => {
       this.host.removeEventListener('pointermove', onPointerMove)
+      this.host.removeEventListener('pointerdown', onPointerDown)
+      this.host.removeEventListener('pointerup', onPointerUp)
+      this.host.removeEventListener('pointercancel', onPointerUp)
       this.host.removeEventListener('pointerleave', onPointerLeave)
     })
 
@@ -296,6 +315,28 @@ export class AsciiWordmarkRenderer {
 
     this.ro = new ResizeObserver(() => this.resize())
     this.ro.observe(this.host)
+  }
+
+  /** Drive cursor FX from outside (e.g. App touch hold when capture would steal events). */
+  setScreenPointer(clientX: number, clientY: number, active: boolean) {
+    if (!active) {
+      this.mouse.set(9999, 9999, 0)
+      this.mouseUv.set(9999, 9999)
+      this.onCard = false
+      return
+    }
+    const r = this.host.getBoundingClientRect()
+    const nx = ((clientX - r.left) / r.width) * 2 - 1
+    const ny = -(((clientY - r.top) / r.height) * 2 - 1)
+    const v = new THREE.Vector3(nx, ny, 0.5).unproject(this.camera)
+    const dir = v.sub(this.camera.position).normalize()
+    const dist = -this.camera.position.z / dir.z
+    this.mouse.copy(this.camera.position).add(dir.multiplyScalar(dist))
+    this.mouseUv.set(
+      (clientX - r.left) / r.width,
+      1 - (clientY - r.top) / r.height,
+    )
+    this.onCard = true
   }
 
   private frameWord(viewportAspect: number) {
