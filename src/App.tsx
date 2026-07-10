@@ -322,19 +322,70 @@ function App() {
     const stage = stageRef.current
     if (!stage) return
 
-    const onMove = (e: PointerEvent) => {
+    let pressId: number | null = null
+
+    const isTouchLike = (e: PointerEvent) =>
+      e.pointerType === 'touch' || e.pointerType === 'pen'
+
+    const sample = (e: PointerEvent) => {
       const rect = stage.getBoundingClientRect()
-      const x = e.clientX - rect.left
-      const y = e.clientY - rect.top
-      const hot = maskRef.current?.hitTest(x, y) ?? false
+      const pad = isTouchLike(e) ? 18 : 0
+      return (
+        maskRef.current?.hitTest(
+          e.clientX - rect.left,
+          e.clientY - rect.top,
+          pad,
+        ) ?? false
+      )
+    }
+
+    const setHot = (hot: boolean) => {
       setAffHot((prev) => (prev === hot ? prev : hot))
     }
-    const onLeave = () => setAffHot(false)
+
+    const onMove = (e: PointerEvent) => {
+      if (isTouchLike(e)) {
+        if (pressId === e.pointerId) setHot(sample(e))
+        return
+      }
+      setHot(sample(e))
+    }
+
+    const onDown = (e: PointerEvent) => {
+      void stemsRef.current?.ensureRunning()
+      if (!isTouchLike(e)) return
+      if (!sample(e)) return
+      pressId = e.pointerId
+      setHot(true)
+      stage.setPointerCapture(e.pointerId)
+      e.preventDefault()
+    }
+
+    const endPress = (e: PointerEvent) => {
+      if (pressId !== e.pointerId) return
+      pressId = null
+      setHot(false)
+      if (stage.hasPointerCapture(e.pointerId)) {
+        stage.releasePointerCapture(e.pointerId)
+      }
+    }
+
+    const onLeave = (e: PointerEvent) => {
+      if (isTouchLike(e)) return
+      setHot(false)
+    }
 
     stage.addEventListener('pointermove', onMove)
+    stage.addEventListener('pointerdown', onDown, { passive: false })
+    stage.addEventListener('pointerup', endPress)
+    stage.addEventListener('pointercancel', endPress)
     stage.addEventListener('pointerleave', onLeave)
+
     return () => {
       stage.removeEventListener('pointermove', onMove)
+      stage.removeEventListener('pointerdown', onDown)
+      stage.removeEventListener('pointerup', endPress)
+      stage.removeEventListener('pointercancel', endPress)
       stage.removeEventListener('pointerleave', onLeave)
     }
   }, [])
@@ -353,12 +404,8 @@ function App() {
     })
   }, [])
 
-  const armAudio = useCallback(() => {
-    void stemsRef.current?.ensureRunning()
-  }, [])
-
   return (
-    <main className="stage" ref={stageRef} onPointerDown={armAudio}>
+    <main className="stage" ref={stageRef}>
       <SoundToggle on={soundOn} onToggle={toggleSound} />
 
       <div className="cross-field cross-field--base" aria-hidden="true">
