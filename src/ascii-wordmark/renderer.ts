@@ -66,6 +66,7 @@ export class AsciiWordmarkRenderer {
   private trailPos: THREE.Vector2[] = []
   private trailAge: Float32Array = new Float32Array(TRAIL_LEN).fill(1)
   private trailOn = 0
+  private cursorOn = 0
   private visibility = 0
   private wordAspect = 3
   private readonly WORD_MARGIN = 0.92 / WORDMARK_VIEW_SCALE
@@ -234,6 +235,10 @@ export class AsciiWordmarkRenderer {
         uTrail: { value: this.trailPos },
         uTrailAge: { value: this.trailAge },
         uTrailOn: { value: 0 },
+        uCursor: { value: new THREE.Vector2(9999, 9999) },
+        uCursorOn: { value: 0 },
+        uCursorColor: { value: new THREE.Vector3(0.12, 0.22, 0.48) },
+        uCursorRadius: { value: 0.15 },
       },
       vertexShader: ASCII_VERT,
       fragmentShader: ASCII_FRAG,
@@ -387,6 +392,10 @@ export class AsciiWordmarkRenderer {
 
     this.trailOn += ((this.onCard ? 1 : 0) - this.trailOn) * Math.min(1, dt * 6)
     au.uTrailOn.value = this.trailOn
+
+    this.cursorOn += ((this.onCard ? 1 : 0) - this.cursorOn) * Math.min(1, dt * 10)
+    au.uCursorOn.value = this.cursorOn
+    au.uCursor.value.copy(this.mouseUv)
 
     this.composer.render()
     this.raf = requestAnimationFrame(this.loop)
