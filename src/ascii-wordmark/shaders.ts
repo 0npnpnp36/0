@@ -175,6 +175,11 @@ uniform vec2  uTrail[${TRAIL_LEN}];
 uniform float uTrailAge[${TRAIL_LEN}];
 uniform float uTrailOn;
 
+uniform vec2  uCursor;
+uniform float uCursorOn;
+uniform vec3  uCursorColor;
+uniform float uCursorRadius;
+
 varying vec2 vUv;
 
 void main() {
@@ -227,8 +232,15 @@ void main() {
 
   vec3 glyphColor = mix(baseColor, trailColor, clamp(trail, 0.0, 1.0));
 
+  // Cursor proximity: glyphs shift blue with soft radial falloff
+  vec2 cursorDelta = (cellCenter - uCursor) * vec2(uAspect, 1.0);
+  float cursorDist = length(cursorDelta);
+  float cursorProx = smoothstep(uCursorRadius, uCursorRadius * 0.15, cursorDist) * uCursorOn;
+  glyphColor = mix(glyphColor, uCursorColor, cursorProx);
+
   float ink = character * smoothstep(0.015, 0.18, luma);
   ink = min(1.0, ink + trail * character * 0.3);
+  ink = min(1.0, ink + cursorProx * character * 0.12);
 
   gl_FragColor = vec4(glyphColor * ink, ink);
 }
