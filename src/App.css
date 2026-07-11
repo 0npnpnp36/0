@@ -54,13 +54,40 @@
 }
 
 .cross-field--base {
-  z-index: 0;
+  z-index: 1;
+}
+
+.love-aura {
+  position: absolute;
+  left: 50%;
+  /* Aff glyph bbox sits slightly above geometric center */
+  top: calc(50% - 2.2vh);
+  z-index: 1;
+  width: max-content;
+  height: max-content;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  display: grid;
+  place-items: center;
+}
+
+.love-word {
+  margin: 0;
+  font-family: Karma, "Noto Sans", "Segoe UI", system-ui, sans-serif;
+  font-size: clamp(1.2rem, 4.5vw, 2.4rem);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1;
+  text-align: center;
+  user-select: none;
+  filter: blur(1.5px);
 }
 
 .wordmark {
   position: absolute;
   inset: 0;
-  z-index: 1;
+  z-index: 2;
 }
 
 .wordmark::after {
@@ -102,7 +129,7 @@
 }
 
 .cross-field--shadow {
-  z-index: 2;
+  z-index: 3;
   mask-size: 100% 100%;
   mask-repeat: no-repeat;
   mask-position: center;
@@ -115,7 +142,7 @@
   position: absolute;
   top: calc(50% + 230px);
   left: 50%;
-  z-index: 3;
+  z-index: 4;
   margin: 0;
   transform: translateX(-50%);
   font-family: Karma, Georgia, "Times New Roman", serif;

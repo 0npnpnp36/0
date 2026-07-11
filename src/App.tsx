@@ -3,6 +3,7 @@ import { AsciiWordmarkRenderer } from './ascii-wordmark'
 import { LOWERCASE_SCALE, WORDMARK_FONT, WORDMARK_VIEW_SCALE } from './ascii-wordmark/draw-wordmark'
 import { buildWordMask, type WordMask } from './ascii-wordmark/word-mask'
 import { HoverStems } from './audio/hover-stems'
+import { LoveAura } from './love-aura'
 import './App.css'
 
 const MAX_CROSSES = 3
@@ -428,6 +429,8 @@ function App() {
           onBreathEnd={handleBreathEnd}
         />
       </div>
+
+      <LoveAura />
 
       <div
         ref={wordmarkRef}
