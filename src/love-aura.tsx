@@ -44,6 +44,7 @@ function pickLove(): LoveEntry {
 
 export function LoveAura() {
   const [entry] = useState(pickLove)
+  const [chunks] = useState(() => chunkWord(entry.word))
 
   return (
     <div className="love-aura" aria-hidden="true">
@@ -52,8 +53,27 @@ export function LoveAura() {
         lang={entry.lang}
         dir={'rtl' in entry && entry.rtl ? 'rtl' : 'ltr'}
       >
-        {entry.word}
+        {chunks.map((chunk, i) => (
+          <span
+            key={i}
+            className={i % 2 === 0 ? 'love-chunk--red' : 'love-chunk--white'}
+          >
+            {chunk}
+          </span>
+        ))}
       </span>
     </div>
   )
+}
+
+/** One grapheme per stripe — red / white / red / white… */
+function chunkWord(word: string): string[] {
+  if (typeof Intl !== 'undefined' && 'Segmenter' in Intl) {
+    return [
+      ...new Intl.Segmenter(undefined, { granularity: 'grapheme' }).segment(
+        word,
+      ),
+    ].map((s) => s.segment)
+  }
+  return [...word]
 }
