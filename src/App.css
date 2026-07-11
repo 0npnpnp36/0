@@ -77,11 +77,18 @@
   font-size: clamp(1.2rem, 4.5vw, 2.4rem);
   font-weight: 500;
   letter-spacing: 0.06em;
-  color: rgba(255, 255, 255, 0.7);
   line-height: 1;
   text-align: center;
   user-select: none;
   filter: blur(1.5px);
+}
+
+.love-chunk--red {
+  color: #e84540;
+}
+
+.love-chunk--white {
+  color: rgba(255, 255, 255, 0.92);
 }
 
 .wordmark {
