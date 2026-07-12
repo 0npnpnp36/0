@@ -4,6 +4,22 @@
   width: 100%;
   overflow: hidden;
   touch-action: none;
+  /* Aff frame: aspect 1024/320, fit 0.92 × view-scale (matches draw-wordmark) */
+  --aff-aspect: 3.2;
+  --aff-scale: 0.67;
+  --aff-h: calc(min(100vw / var(--aff-aspect), 100svh) * 0.92 * var(--aff-scale));
+}
+
+@media (max-aspect-ratio: 1/1) {
+  .stage {
+    --aff-scale: 0.8;
+  }
+}
+
+@media (max-aspect-ratio: 7/10) {
+  .stage {
+    --aff-scale: 0.9;
+  }
 }
 
 .sound-toggle {
@@ -60,8 +76,8 @@
 .love-aura {
   position: absolute;
   left: 50%;
-  /* Aff glyph bbox sits slightly above geometric center */
-  top: calc(50% - 2.2vh);
+  /* Aff glyph bbox sits slightly above geometric center (~5.6% of frame) */
+  top: calc(50% - var(--aff-h) * 0.056);
   z-index: 1;
   width: max-content;
   height: max-content;
@@ -74,7 +90,7 @@
 .love-word {
   margin: 0;
   font-family: Karma, "Noto Sans", "Segoe UI", system-ui, sans-serif;
-  font-size: clamp(1.2rem, 4.5vw, 2.4rem);
+  font-size: max(0.75rem, calc(var(--aff-h) * 0.14));
   font-weight: 500;
   letter-spacing: 0.06em;
   line-height: 1;
@@ -101,9 +117,9 @@
   content: "";
   position: absolute;
   left: 50%;
-  top: 50%;
-  width: min(72vw, 520px);
-  height: min(22vw, 140px);
+  top: calc(50% - var(--aff-h) * 0.056);
+  width: calc(var(--aff-h) * var(--aff-aspect) * 1.05);
+  height: calc(var(--aff-h) * 0.85);
   transform: translate(-50%, -50%);
   border-radius: 50%;
   pointer-events: none;
@@ -147,13 +163,13 @@
 
 .prompt {
   position: absolute;
-  top: calc(50% + 230px);
+  top: calc(50% + var(--aff-h) * 0.62);
   left: 50%;
   z-index: 4;
   margin: 0;
   transform: translateX(-50%);
   font-family: Karma, Georgia, "Times New Roman", serif;
-  font-size: clamp(0.95rem, 2.2vw, 1.15rem);
+  font-size: max(0.75rem, calc(var(--aff-h) * 0.055));
   font-weight: 400;
   letter-spacing: 0.02em;
   color: #fff;

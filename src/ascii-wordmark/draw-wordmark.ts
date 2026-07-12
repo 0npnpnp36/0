@@ -1,7 +1,30 @@
 export const WORDMARK_FONT = 'Karma'
 
-/** On-screen size multiplier vs the default framed wordmark. */
+/** On-screen size multiplier vs the default framed wordmark (landscape). */
 export const WORDMARK_VIEW_SCALE = 0.67
+
+/** Particle / mask canvas aspect (matches word-points). */
+export const WORDMARK_ASPECT = 1024 / 320
+
+/**
+ * Aff reads tiny on portrait if we keep the landscape scale — bump it
+ * so love/prompt ratios can stay locked to the same frame.
+ */
+export function wordmarkViewScale(viewportAspect: number): number {
+  if (viewportAspect < 0.7) return 0.9
+  if (viewportAspect < 1) return 0.8
+  return WORDMARK_VIEW_SCALE
+}
+
+/** Camera distance multiplier (larger → smaller Aff on screen). */
+export function wordmarkCameraMargin(viewportAspect: number): number {
+  return 0.92 / wordmarkViewScale(viewportAspect)
+}
+
+/** Mask / CSS box as a fraction of the limiting viewport edge. */
+export function wordmarkFitFraction(viewportAspect: number): number {
+  return 0.92 * wordmarkViewScale(viewportAspect)
+}
 
 function wordFont(size: number) {
   return `700 ${size}px ${WORDMARK_FONT}, Georgia, "Times New Roman", serif`

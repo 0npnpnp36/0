@@ -13,7 +13,7 @@ import {
 } from './shaders'
 import { buildAtlas, RAMP } from './atlas'
 import { buildWordPoints } from './word-points'
-import { WORDMARK_VIEW_SCALE } from './draw-wordmark'
+import { wordmarkCameraMargin } from './draw-wordmark'
 
 const FLOW_INFLUENCE = 0.43
 const FLOW_STRENGTH = 1.09
@@ -69,7 +69,6 @@ export class AsciiWordmarkRenderer {
   private cursorOn = 0
   private visibility = 0
   private wordAspect = 3
-  private readonly WORD_MARGIN = 0.92 / WORDMARK_VIEW_SCALE
 
   private io?: IntersectionObserver
   private ro?: ResizeObserver
@@ -344,7 +343,9 @@ export class AsciiWordmarkRenderer {
     const tanV = Math.tan(halfV)
     const distForHeight = 1.0 / tanV
     const distForWidth = this.wordAspect / (tanV * viewportAspect)
-    const dist = Math.max(distForHeight, distForWidth) * this.WORD_MARGIN
+    const dist =
+      Math.max(distForHeight, distForWidth) *
+      wordmarkCameraMargin(viewportAspect)
     this.camera.position.set(0, 0, dist)
   }
 

@@ -1,4 +1,9 @@
-import { drawWordmark, fitWordmarkSize, WORDMARK_VIEW_SCALE } from './draw-wordmark'
+import {
+  drawWordmark,
+  fitWordmarkSize,
+  wordmarkFitFraction,
+  WORDMARK_ASPECT,
+} from './draw-wordmark'
 
 export type WordMask = {
   dataUrl: string
@@ -22,8 +27,8 @@ export function buildWordMask(
   const ctx = canvas.getContext('2d', { willReadFrequently: true })!
   ctx.clearRect(0, 0, w, h)
 
-  const wordAspect = 1024 / 320
-  const margin = 0.92 * WORDMARK_VIEW_SCALE
+  const wordAspect = WORDMARK_ASPECT
+  const margin = wordmarkFitFraction(w / h)
   let boxW = w * margin
   let boxH = boxW / wordAspect
   if (boxH > h * margin) {
