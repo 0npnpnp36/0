@@ -19,10 +19,16 @@ function el(name: string, attrs: Record<string, string | number>) {
   return n
 }
 
+/** Distance from center to ellipse edge along unit direction (ux, uy). */
+function ellipseGap(ux: number, uy: number, gapX: number, gapY: number) {
+  const a = gapX > 1 ? gapX : 1
+  const b = gapY > 1 ? gapY : 1
+  return 1 / Math.sqrt((ux * ux) / (a * a) + (uy * uy) / (b * b))
+}
+
 /**
- * Four corner chains converging on Aff / love.
- * Center knot + approach gap are sized to the Aff letter box so they
- * stay inside the word rather than a giant blob over it.
+ * Four corner chains converging on Aff.
+ * Clear zone is an ellipse around Aff so left/right/top/bottom gaps match.
  */
 export function AffChains() {
   const hostRef = useRef<HTMLDivElement>(null)
@@ -47,16 +53,17 @@ export function AffChains() {
       const affAspect =
         parseFloat(cs.getPropertyValue('--aff-aspect')) || 3.2
 
-      // Aff letter box (tighter than the full particle frame)
+      // Aff letter box — hub on Aff center (not the love horizontal nudge)
       const letterW = affH * affAspect * 0.3
       const letterH = affH * 0.52
-
-      // Match love-aura CSS anchor
-      const cx = W * 0.5 + affH * 0.055
+      const cx = W * 0.5
       const cy = H * 0.5 - affH * 0.056
 
-      // Clear gap so chains stop at the word edge (links ~3× smaller)
-      const startGap = Math.min(letterW, letterH) * 0.48
+      // Equal padding around the word (elliptical clear zone)
+      const pad = 1.08
+      const gapX = (letterW / 2) * pad
+      const gapY = (letterH / 2) * pad
+
       const scale = Math.min(1.15, Math.max(0.55, affH / 220)) / 3
       const spacing = 86 * scale
       const linkLen = 56 * scale
@@ -95,7 +102,9 @@ export function AffChains() {
         const px = -uy
         const py = ux
 
-        // Spine starts at the word edge (startGap), not from the core
+        // Per-ray start so left/right clear matches Aff’s wide box
+        const startGap = ellipseGap(ux, uy, gapX, gapY)
+
         let d = ''
         for (let s = startGap; s <= dist; s += 24) {
           const w = Math.sin(s / 130) * wobble
@@ -111,7 +120,6 @@ export function AffChains() {
           }),
         )
 
-        // Loops from word edge outward — none inside the letter box
         for (let s = startGap; s < dist - 40; s += spacing) {
           const w = Math.sin(s / 130) * wobble
           const jx = rr(-7, 7) * scale
