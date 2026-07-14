@@ -1,0 +1,168 @@
+<!-- ============================================================
+     AFF · chains overlay
+     Four loose chains from the corners converging on the
+     hidden center word (ፍቅር). White line-art, 0.79 opacity.
+
+     To use on your own page: copy the .aff-chains block
+     (the <div> + <svg> + <script>) into your markup. It's
+     position:fixed, pointer-events:none, so it just floats
+     over whatever is underneath. Tune the CONFIG object.
+     ============================================================ -->
+<meta charset="utf-8">
+<style>
+  html, body { margin: 0; height: 100%; background: #000; overflow: hidden; }
+
+  /* --- demo-only center word, so you can see the chains link to it --- */
+  .stage {
+    position: fixed; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-family: Georgia, "Times New Roman", serif;
+  }
+  .word {
+    position: relative; z-index: 2;
+    font-size: clamp(80px, 16vw, 240px);
+    font-weight: 700; letter-spacing: .04em; color: #fff;
+  }
+  .word .amh {
+    position: absolute; left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+    color: #c9302c; font-size: .28em; letter-spacing: .05em;
+    white-space: nowrap;
+  }
+  .tag {
+    position: fixed; left: 50%; top: 66%; transform: translateX(-50%);
+    z-index: 2; color: #6a6a6a; font-family: Georgia, serif;
+    font-size: 20px; letter-spacing: .02em;
+  }
+  .tag .fade { color: #262626; }
+
+  /* --- the overlay itself --- */
+  .aff-chains {
+    position: fixed; inset: 0; z-index: 1;
+    pointer-events: none;
+  }
+  .aff-chains svg { width: 100%; height: 100%; display: block; }
+</style>
+
+<!-- demo backdrop -->
+<div class="stage">
+  <div class="word">Aff<span class="amh">ፍቅር</span></div>
+</div>
+<div class="tag">are you <span class="fade">watching</span>?</div>
+
+<!-- ===================== OVERLAY (copy this) ===================== -->
+<div class="aff-chains" aria-hidden="true">
+  <svg id="affChains" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice"></svg>
+</div>
+
+<script>
+(function () {
+  const svg   = document.getElementById('affChains');
+  const NS    = 'http://www.w3.org/2000/svg';
+
+  const CONFIG = {
+    cx: 960, cy: 470,        // where the chains converge (behind the word)
+    opacity: 0.79,           // <- your 79% white
+    stroke: '#ffffff',
+    spineWidth: 1,           // faint guide line the loops sit on
+    linkWidth: 1.6,          // the loops
+    seed: 7,                 // change for a different random layout
+    // each corner target, as fractions of the 1920x1080 box (past the edge a touch)
+    targets: [
+      { x: -60,   y: -60   },  // top-left
+      { x: 1980,  y: -60   },  // top-right
+      { x: -60,   y: 1140  },  // bottom-left
+      { x: 1980,  y: 1140  },  // bottom-right
+    ],
+    startGap: 130,           // clear space around the center word
+    spacing:  86,            // distance between loops
+    linkLen:  56,            // loop half-length (along the chain)
+    linkWid:  22,            // loop half-width (across the chain)
+    wobble:   14,            // how much the chain drifts side to side
+  };
+
+  // tiny seeded RNG so the layout is stable between reloads
+  let s = CONFIG.seed;
+  const rand = () => (s = (s * 9301 + 49297) % 233280) / 233280;
+  const rr = (a, b) => a + rand() * (b - a);
+
+  const el = (name, attrs) => {
+    const n = document.createElementNS(NS, name);
+    for (const k in attrs) n.setAttribute(k, attrs[k]);
+    return n;
+  };
+
+  function chain(tx, ty) {
+    const g = el('g', {
+      fill: 'none',
+      stroke: CONFIG.stroke,
+      'stroke-opacity': CONFIG.opacity,
+      'stroke-linecap': 'round',
+    });
+
+    const dx = tx - CONFIG.cx, dy = ty - CONFIG.cy;
+    const dist = Math.hypot(dx, dy);
+    const ang  = Math.atan2(dy, dx);
+    const deg  = ang * 180 / Math.PI;
+    const ux = dx / dist, uy = dy / dist;   // along
+    const px = -uy,       py = ux;          // across
+
+    // wavy spine
+    let d = '';
+    for (let t = 0; t <= dist; t += 24) {
+      const w = Math.sin(t / 130) * CONFIG.wobble;
+      const x = CONFIG.cx + ux * t + px * w;
+      const y = CONFIG.cy + uy * t + py * w;
+      d += (t === 0 ? 'M' : 'L') + x.toFixed(1) + ' ' + y.toFixed(1) + ' ';
+    }
+    g.appendChild(el('path', { d, 'stroke-width': CONFIG.spineWidth, 'stroke-opacity': CONFIG.opacity * 0.5 }));
+
+    // loops along the spine
+    for (let t = CONFIG.startGap; t < dist - 40; t += CONFIG.spacing) {
+      const w  = Math.sin(t / 130) * CONFIG.wobble;
+      const jx = rr(-7, 7), jy = rr(-7, 7);
+      const x  = CONFIG.cx + ux * t + px * w + jx;
+      const y  = CONFIG.cy + uy * t + py * w + jy;
+      const rot = deg + rr(-9, 9);
+      g.appendChild(el('ellipse', {
+        cx: x.toFixed(1), cy: y.toFixed(1),
+        rx: (CONFIG.linkLen * rr(0.9, 1.1)).toFixed(1),
+        ry: (CONFIG.linkWid * rr(0.85, 1.15)).toFixed(1),
+        transform: `rotate(${rot.toFixed(1)} ${x.toFixed(1)} ${y.toFixed(1)})`,
+        'stroke-width': CONFIG.linkWidth,
+      }));
+    }
+    return g;
+  }
+
+  // central tangle — the loose knot the chains link into
+  function knot() {
+    const g = el('g', {
+      fill: 'none', stroke: CONFIG.stroke,
+      'stroke-opacity': CONFIG.opacity, 'stroke-width': CONFIG.linkWidth,
+      'stroke-linecap': 'round', 'stroke-linejoin': 'round',
+    });
+    const R = 74, N = 26;
+    let d = '';
+    for (let i = 0; i <= N; i++) {
+      const a  = (i / N) * Math.PI * 2;
+      const rr2 = R * rr(0.55, 1.15);
+      const x  = CONFIG.cx + Math.cos(a) * rr2 * 1.25;
+      const y  = CONFIG.cy + Math.sin(a) * rr2 * 0.78;
+      d += (i === 0 ? 'M' : 'L') + x.toFixed(1) + ' ' + y.toFixed(1) + ' ';
+    }
+    d += 'Z';
+    g.appendChild(el('path', { d }));
+    return g;
+  }
+
+  function draw() {
+    svg.innerHTML = '';
+    svg.appendChild(knot());
+    CONFIG.targets.forEach(t => svg.appendChild(chain(t.x, t.y)));
+  }
+
+  draw();
+})();
+</script>
+<!-- =================== END OVERLAY (copy this) =================== -->

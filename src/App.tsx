@@ -3,6 +3,7 @@ import { AsciiWordmarkRenderer } from './ascii-wordmark'
 import { LOWERCASE_SCALE, WORDMARK_FONT, WORDMARK_VIEW_SCALE } from './ascii-wordmark/draw-wordmark'
 import { buildWordMask, type WordMask } from './ascii-wordmark/word-mask'
 import { HoverStems } from './audio/hover-stems'
+import { AffChains } from './aff-chains'
 import { LoveAura } from './love-aura'
 import './App.css'
 
@@ -430,6 +431,7 @@ function App() {
         />
       </div>
 
+      <AffChains />
       <LoveAura />
 
       <div

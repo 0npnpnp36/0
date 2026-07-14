@@ -4,6 +4,7 @@
   width: 100%;
   overflow: hidden;
   touch-action: none;
+  background-color: #000;
   /* Aff frame: aspect 1024/320, fit 0.92 × view-scale (matches draw-wordmark) */
   --aff-aspect: 3.2;
   --aff-scale: 0.67;
@@ -24,7 +25,7 @@
 
 .sound-toggle {
   position: absolute;
-  top: 1.25rem;
+  bottom: 1.25rem;
   right: 1.25rem;
   z-index: 5;
   display: grid;
@@ -73,10 +74,24 @@
   z-index: 1;
 }
 
+.aff-chains {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.aff-chains svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
 .love-aura {
   position: absolute;
-  left: 50%;
-  /* Aff glyph bbox sits slightly above geometric center (~5.6% of frame) */
+  /* Aff’s visible mass sits a bit right of raw 50% — track that */
+  left: calc(50% + var(--aff-h) * 0.055);
+  /* Aff letter bbox sits a bit above raw 50% */
   top: calc(50% - var(--aff-h) * 0.056);
   z-index: 1;
   width: max-content;
@@ -89,6 +104,8 @@
 
 .love-word {
   margin: 0;
+  /* Trailing letter-spacing widens the box — cancel so glyphs sit on Aff */
+  margin-inline-end: -0.06em;
   font-family: Karma, "Noto Sans", "Segoe UI", system-ui, sans-serif;
   font-size: max(0.75rem, calc(var(--aff-h) * 0.14));
   font-weight: 500;
