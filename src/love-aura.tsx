@@ -34,6 +34,9 @@ const LOVE_BY_LANG = [
   { lang: 'Bhojpuri', word: 'प्रेम' },
   { lang: 'Malayalam', word: 'സ്നേഹം' },
   { lang: 'Polish', word: 'miłość' },
+  { lang: 'Latin', word: 'amor' },
+  { lang: 'Greek', word: 'αγάπη' },
+  { lang: 'Aramaic', word: 'ܚܘܒܐ', rtl: true },
 ] as const
 
 type LoveEntry = (typeof LOVE_BY_LANG)[number]

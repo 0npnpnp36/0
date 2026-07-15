@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" fill="none">
+  <title>AffectionChain interlocking chain overlay</title>
+  <desc>Four strands of alternating oval links converge toward an interlocking chain halo.</desc>
+
+  <defs>
+    <!-- Organic forged-ring geometry avoids the synthetic capsule silhouette. -->
+    <g id="face-link">
+      <path d="M-44 0C-44-22-25-32 0-32S44-22 44 0 25 32 0 32-44 22-44 0Z"/>
+      <path d="M-33 0C-33-13-16-20 0-20S33-13 33 0 16 20 0 20-33 13-33 0Z" opacity=".52"/>
+      <path d="M-39-12C-30-25-16-28-3-28M39 12C30 25 16 28 3 28" opacity=".28"/>
+    </g>
+
+    <!-- The alternating edge-on link creates the woven over/under rhythm. -->
+    <g id="edge-link">
+      <path d="M0-29C11-29 16-16 16 0S11 29 0 29-16 16-16 0-11-29 0-29Z"/>
+      <path d="M0-20C5-20 8-10 8 0S5 20 0 20-8 10-8 0-5-20 0-20Z" opacity=".52"/>
+      <path d="M-11-18C-3-10 3 10 11 18" opacity=".28"/>
+    </g>
+
+    <!-- Three equally proportioned 1.38:1 rings match the reference chain silhouette. -->
+    <g id="key-chain">
+      <g transform="scale(.7)">
+        <use href="#face-link" transform="translate(-40 0) scale(.68)"/>
+        <use href="#face-link" transform="translate(40 0) scale(.68)"/>
+        <use href="#face-link" transform="translate(0 2) scale(.68)"/>
+      </g>
+    </g>
+
+    <!-- Small luminous termination used where each string releases into the center. -->
+    <g id="end-node">
+      <circle r="2.6" fill="#fff" fill-opacity=".72" stroke="none"/>
+      <circle r="6.5"/>
+      <path d="M-8.5-5.5A10 10 0 0 1 8.5 5.5" opacity=".46"/>
+      <path d="M-5.5 8.5A10 10 0 0 1-8.5 5.5" opacity=".22"/>
+    </g>
+  </defs>
+
+  <g stroke="#fff" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round"
+     stroke-opacity=".5">
+
+    <!-- Upper-left string with exactly three key chain-objects -->
+    <g class="strand strand-nw">
+      <path pathLength="100" stroke-dasharray="72 28" d="M-25-18C44 47 110 91 185 125S338 192 493 312C555 353 593 371 648 389"/>
+      <path pathLength="100" stroke-width=".9" stroke-dasharray="28 72" stroke-dashoffset="28" opacity=".48" d="M-25-18C44 47 110 91 185 125S338 192 493 312C555 353 593 371 648 389"/>
+      <use href="#key-chain" transform="translate(66.4 57.3) rotate(35.2)"/>
+      <use href="#key-chain" transform="translate(211.7 137.1) rotate(24.5)"/>
+      <use href="#key-chain" transform="translate(357.7 215.7) rotate(32.5)"/>
+      <use href="#end-node" transform="translate(455.1 283.2) rotate(36.6)"/>
+    </g>
+
+    <!-- Upper-right string with exactly three key chain-objects -->
+    <g class="strand strand-ne">
+      <path pathLength="100" stroke-dasharray="72 28" d="M1625-12C1544 24 1470 65 1390 101S1238 190 1101 310C1036 353 1000 371 952 389"/>
+      <path pathLength="100" stroke-width=".9" stroke-dasharray="28 72" stroke-dashoffset="28" opacity=".48" d="M1625-12C1544 24 1470 65 1390 101S1238 190 1101 310C1036 353 1000 371 952 389"/>
+      <use href="#key-chain" transform="translate(1518.4 38.9) rotate(153.5)"/>
+      <use href="#key-chain" transform="translate(1369.4 110.8) rotate(153.6)"/>
+      <use href="#key-chain" transform="translate(1231 201) rotate(142)"/>
+      <use href="#end-node" transform="translate(1139.9 276.2) rotate(139.4)"/>
+    </g>
+
+    <!-- Lower-left string with exactly three key chain-objects -->
+    <g class="strand strand-sw">
+      <path pathLength="100" stroke-dasharray="72 28" d="M-22 918C54 852 130 789 215 742S377 678 505 594C570 552 603 533 650 519"/>
+      <path pathLength="100" stroke-width=".9" stroke-dasharray="28 72" stroke-dashoffset="28" opacity=".48" d="M-22 918C54 852 130 789 215 742S377 678 505 594C570 552 603 533 650 519"/>
+      <use href="#key-chain" transform="translate(68.3 842.3) rotate(-38.5)"/>
+      <use href="#key-chain" transform="translate(203.7 748.4) rotate(-29.9)"/>
+      <use href="#key-chain" transform="translate(352.8 677.8) rotate(-24.6)"/>
+      <use href="#end-node" transform="translate(457.4 623.7) rotate(-30.5)"/>
+    </g>
+
+    <!-- Lower-right string with exactly three key chain-objects -->
+    <g class="strand strand-se">
+      <path pathLength="100" stroke-dasharray="72 28" d="M1622 922C1543 853 1468 803 1383 759S1225 686 1094 590C1031 550 997 532 950 519"/>
+      <path pathLength="100" stroke-width=".9" stroke-dasharray="28 72" stroke-dashoffset="28" opacity=".48" d="M1622 922C1543 853 1468 803 1383 759S1225 686 1094 590C1031 550 997 532 950 519"/>
+      <use href="#key-chain" transform="translate(1529.7 848.6) rotate(-144.4)"/>
+      <use href="#key-chain" transform="translate(1389.1 762.2) rotate(-152.4)"/>
+      <use href="#key-chain" transform="translate(1242.3 686.5) rotate(-150.6)"/>
+      <use href="#end-node" transform="translate(1142.2 624.1) rotate(-145.7)"/>
+    </g>
+  </g>
+</svg>
