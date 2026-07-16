@@ -9,11 +9,14 @@ export type WordMask = {
   dataUrl: string
   width: number
   height: number
+  /** Top/bottom of the letter ink in stage CSS px (for hover volume mapping). */
+  inkTop: number
+  inkBottom: number
   /** Hit-test letter ink. `x`/`y` are CSS pixels in the stage. */
   hitTest: (x: number, y: number, padPx?: number) => boolean
 }
 
-/** Builds an alpha mask of `word` framed like the ASCII wordmark (1024×320 @ ~92%). */
+/** Builds an alpha mask of `word` using the WebGL wordmark's screen projection. */
 export function buildWordMask(
   word: string,
   viewportW: number,
@@ -43,7 +46,34 @@ export function buildWordMask(
 
   const image = ctx.getImageData(0, 0, w, h)
   const data = image.data
-  const radius = Math.max(2, Math.round(Math.min(w, h) * 0.006))
+  // ASCII post-processing expands the particle image into w/200-wide cells,
+  // while the flow field lets edge particles drift slightly from their base.
+  // Include both allowances so every visibly occupied edge remains interactive.
+  const asciiCellPx = w / 200
+  const particleDriftPx = Math.min(w, h) * 0.004
+  const radius = Math.max(3, Math.ceil(asciiCellPx + particleDriftPx))
+
+  // Vertical extent of the ink — used to map cursor height to hover volume.
+  let inkTop = -1
+  let inkBottom = -1
+  for (let y = 0; y < h; y++) {
+    const rowBase = y * w * 4
+    let rowHit = false
+    for (let x = 0; x < w; x++) {
+      if (data[rowBase + x * 4 + 3] > 24) {
+        rowHit = true
+        break
+      }
+    }
+    if (rowHit) {
+      if (inkTop < 0) inkTop = y
+      inkBottom = y
+    }
+  }
+  if (inkTop < 0) {
+    inkTop = 0
+    inkBottom = h
+  }
 
   const hitTest = (x: number, y: number, padPx = 0) => {
     const px = Math.round(x)
@@ -64,6 +94,8 @@ export function buildWordMask(
     dataUrl: canvas.toDataURL('image/png'),
     width: w,
     height: h,
+    inkTop,
+    inkBottom,
     hitTest,
   }
 }

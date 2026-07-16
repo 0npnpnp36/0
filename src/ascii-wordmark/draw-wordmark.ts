@@ -21,9 +21,13 @@ export function wordmarkCameraMargin(viewportAspect: number): number {
   return 0.92 / wordmarkViewScale(viewportAspect)
 }
 
-/** Mask / CSS box as a fraction of the limiting viewport edge. */
+/**
+ * Projected wordmark frame as a fraction of the limiting viewport edge.
+ * This must be the reciprocal of the camera margin so the DOM hit mask and
+ * the WebGL particle wordmark use the same screen-space transform.
+ */
 export function wordmarkFitFraction(viewportAspect: number): number {
-  return 0.92 * wordmarkViewScale(viewportAspect)
+  return 1 / wordmarkCameraMargin(viewportAspect)
 }
 
 function wordFont(size: number) {

@@ -11,6 +11,7 @@ export class HoverStems {
   private loadPromise: Promise<void> | null = null
   private masterOn = true
   private hoverOn = false
+  private hoverLevel = 0.9
 
   async ensureRunning() {
     if (!this.ctx) {
@@ -25,15 +26,18 @@ export class HoverStems {
       this.hover.gain.value = 0
       this.hover.connect(this.master)
       this.master.connect(this.ctx.destination)
-      this.loadPromise = this.loadAndStart(this.ctx, this.hover)
+      // Swallow load failure so callers (e.g. the sound toggle) never hang or reject.
+      this.loadPromise = this.loadAndStart(this.ctx, this.hover).catch((err) => {
+        console.warn('[hover-stems] track load failed', err)
+      })
     }
 
     if (this.ctx.state === 'suspended') await this.ctx.resume()
     await this.loadPromise
 
     // Re-apply gates after unlock — Aff may already be hot pre-gesture.
-    this.applyMaster(true)
-    this.applyHover(true)
+    this.applyMaster()
+    this.applyHover()
   }
 
   private async loadAndStart(ctx: AudioContext, dest: AudioNode) {
@@ -48,22 +52,28 @@ export class HoverStems {
     this.source = source
   }
 
-  private applyMaster(immediate = false) {
+  private applyMaster() {
     if (!this.master || !this.ctx) return
     const t = this.ctx.currentTime
+    const gain = this.master.gain
     const target = this.masterOn ? 0.75 : 0
-    this.master.gain.cancelScheduledValues(t)
-    if (immediate) this.master.gain.setValueAtTime(target, t)
-    else this.master.gain.linearRampToValueAtTime(target, t + 0.12)
+    // Anchor at the current value before ramping: without this, the ramp
+    // interpolates from a stale scheduled point, producing clicks/zipper noise.
+    gain.cancelScheduledValues(t)
+    gain.setValueAtTime(gain.value, t)
+    gain.linearRampToValueAtTime(target, t + 0.12)
   }
 
-  private applyHover(immediate = false) {
+  private applyHover() {
     if (!this.hover || !this.ctx) return
     const t = this.ctx.currentTime
-    const target = this.hoverOn ? 1 : 0
-    this.hover.gain.cancelScheduledValues(t)
-    if (immediate) this.hover.gain.setValueAtTime(target, t)
-    else this.hover.gain.linearRampToValueAtTime(target, t + 0.18)
+    const gain = this.hover.gain
+    const target = this.hoverOn ? this.hoverLevel : 0
+    gain.cancelScheduledValues(t)
+    gain.setValueAtTime(gain.value, t)
+    // Short ramp so volume can follow the cursor's vertical position smoothly
+    // (no zipper noise, thanks to the anchored setValueAtTime above).
+    gain.linearRampToValueAtTime(target, t + 0.09)
   }
 
   setMaster(on: boolean) {
@@ -71,8 +81,10 @@ export class HoverStems {
     this.applyMaster()
   }
 
-  setHover(on: boolean) {
+  /** `level` (0–1) sets the hover volume, e.g. by cursor height over the letters. */
+  setHover(on: boolean, level = this.hoverLevel) {
     this.hoverOn = on
+    this.hoverLevel = Math.min(1, Math.max(0, level))
     this.applyHover()
   }
 

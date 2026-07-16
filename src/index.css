@@ -1,5 +1,35 @@
-@import url("https://api.fontshare.com/v2/css?f[]=karma@400,500,600,700&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap");
+/* Karma is self-hosted (public/fonts) so the wordmark canvas mount waits only on
+   a same-origin font instead of a third-party CDN round-trip. The 700 weight is
+   additionally preloaded in index.html. IBM Plex Mono still comes from Google via
+   a <link> in index.html. */
+@font-face {
+  font-family: "Karma";
+  src: url("/fonts/karma-400.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Karma";
+  src: url("/fonts/karma-500.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Karma";
+  src: url("/fonts/karma-600.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Karma";
+  src: url("/fonts/karma-700.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
 
 *,
 *::before,

@@ -219,6 +219,18 @@ function App() {
   const [affHot, setAffHot] = useState(false)
   const timersRef = useRef<number[]>([])
   const wordmarkApiRef = useRef<AsciiWordmarkRenderer | null>(null)
+  // Mirrors of state + cursor-derived hover volume, read imperatively by the
+  // pointer handlers so volume can track the cursor without re-rendering.
+  const affHotRef = useRef(false)
+  const soundOnRef = useRef(false)
+  const hoverLevelRef = useRef(0.9)
+
+  const syncHoverAudio = useCallback(() => {
+    stemsRef.current?.setHover(
+      affHotRef.current && soundOnRef.current,
+      hoverLevelRef.current,
+    )
+  }, [])
 
   const clearTimers = useCallback(() => {
     timersRef.current.forEach(clearTimeout)
@@ -252,12 +264,10 @@ function App() {
   }, [])
 
   useEffect(() => {
+    soundOnRef.current = soundOn
     stemsRef.current?.setMaster(soundOn)
-  }, [soundOn])
-
-  useEffect(() => {
-    stemsRef.current?.setHover(affHot && soundOn)
-  }, [affHot, soundOn])
+    syncHoverAudio()
+  }, [soundOn, syncHoverAudio])
 
   useEffect(() => {
     const host = wordmarkRef.current
@@ -268,8 +278,9 @@ function App() {
 
     void (async () => {
       try {
+        // Only wait for the wordmark face itself — awaiting document.fonts.ready
+        // needlessly blocked canvas mount on unrelated fonts (e.g. IBM Plex Mono).
         await document.fonts.load(`700 240px ${WORDMARK_FONT}`)
-        await document.fonts.ready
       } catch {
         // fall back to system serifs in word-points
       }
@@ -308,7 +319,6 @@ function App() {
     void (async () => {
       try {
         await document.fonts.load(`700 240px ${WORDMARK_FONT}`)
-        await document.fonts.ready
       } catch {
         // use fallback metrics
       }
@@ -345,7 +355,20 @@ function App() {
     }
 
     const setHot = (hot: boolean) => {
+      affHotRef.current = hot
+      syncHoverAudio()
       setAffHot((prev) => (prev === hot ? prev : hot))
+    }
+
+    // Cursor height over the letters → hover volume: top ink → 90%, bottom → 10%.
+    const updateLevel = (clientY: number) => {
+      const mask = maskRef.current
+      if (!mask) return
+      const rect = stage.getBoundingClientRect()
+      const y = clientY - rect.top
+      const span = Math.max(1, mask.inkBottom - mask.inkTop)
+      const frac = Math.min(1, Math.max(0, (y - mask.inkTop) / span))
+      hoverLevelRef.current = 0.9 - 0.8 * frac
     }
 
     const driveVisuals = (e: PointerEvent, active: boolean) => {
@@ -356,12 +379,14 @@ function App() {
       if (isTouchLike(e)) {
         if (pressId === e.pointerId) {
           const hot = sample(e)
+          if (hot) updateLevel(e.clientY)
           setHot(hot)
           driveVisuals(e, hot)
         }
         return
       }
       const hot = sample(e)
+      if (hot) updateLevel(e.clientY)
       setHot(hot)
       driveVisuals(e, true)
     }
@@ -372,6 +397,7 @@ function App() {
       const hot = sample(e)
       if (!hot) return
       pressId = e.pointerId
+      updateLevel(e.clientY)
       setHot(true)
       driveVisuals(e, true)
       e.preventDefault()
@@ -403,7 +429,7 @@ function App() {
       stage.removeEventListener('pointercancel', endPress)
       stage.removeEventListener('pointerleave', onLeave)
     }
-  }, [])
+  }, [syncHoverAudio])
 
   const handleBreathEnd = useCallback(
     (id: number) => {
@@ -414,9 +440,11 @@ function App() {
   )
 
   const toggleSound = useCallback(() => {
-    void stemsRef.current?.ensureRunning().then(() => {
-      setSoundOn((v) => !v)
-    })
+    // Flip UI state immediately; the master-gain effect reacts to `soundOn`.
+    // Audio unlock/decode runs in parallel so the button never waits on a
+    // network fetch or `decodeAudioData` (which made the first click feel dead).
+    setSoundOn((v) => !v)
+    void stemsRef.current?.ensureRunning()
   }, [])
 
   return (

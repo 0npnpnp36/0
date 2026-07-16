@@ -90,7 +90,9 @@ export class AsciiWordmarkRenderer {
       failIfMajorPerformanceCaveat: false,
     })
     this.renderer.setPixelRatio(dpr)
-    this.renderer.setSize(w, h)
+    // updateStyle=false: keep the CSS-driven 100%/100% below instead of letting
+    // three.js stamp inline px sizes on the canvas (which caused resize thrash).
+    this.renderer.setSize(w, h, false)
     this.renderer.setClearColor(0x000000, 0)
     this.host.appendChild(this.renderer.domElement)
     Object.assign(this.renderer.domElement.style, {
@@ -355,7 +357,8 @@ export class AsciiWordmarkRenderer {
     if (w === 0 || h === 0) return
     const dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR)
     this.renderer.setPixelRatio(dpr)
-    this.renderer.setSize(w, h)
+    // Keep inline canvas style at 100% (see mount) — avoid px thrash on resize.
+    this.renderer.setSize(w, h, false)
     this.composer.setPixelRatio(dpr)
     this.composer.setSize(w, h)
     this.camera.aspect = w / h
