@@ -485,6 +485,20 @@ function App() {
       >
         <CrossMarks crosses={crosses} variant="shadow" />
       </div>
+
+      <a
+        className="bottom-x"
+        href="https://x.com/ambivi5"
+        target="_blank"
+        rel="noreferrer"
+        aria-label="x.com/ambivi5"
+      >
+        <span className="bottom-x-corner bottom-x-corner--tl" aria-hidden="true" />
+        <span className="bottom-x-corner bottom-x-corner--tr" aria-hidden="true" />
+        <span className="bottom-x-corner bottom-x-corner--bl" aria-hidden="true" />
+        <span className="bottom-x-corner bottom-x-corner--br" aria-hidden="true" />
+        <span className="bottom-x-glyph">x</span>
+      </a>
     </main>
   )
 }

@@ -64,6 +64,83 @@
   display: block;
 }
 
+.bottom-x {
+  position: absolute;
+  /* Vertically centered on the sound toggle (bottom 1.25rem + half its 2.75rem height) */
+  bottom: calc(1.25rem + 1.375rem - 5px);
+  left: 0.9rem;
+  transform: translateY(50%);
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  width: 1.45em;
+  height: 1.45em;
+  font-family: Karma, Georgia, "Times New Roman", serif;
+  font-size: max(0.7rem, calc(var(--aff-h) * 0.038));
+  font-weight: 400;
+  text-transform: lowercase;
+  text-decoration: none;
+  color: #a9a9a9;
+  line-height: 1;
+  user-select: none;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.bottom-x:hover,
+.bottom-x:focus-visible {
+  color: #fff;
+  outline: none;
+}
+
+.bottom-x-glyph {
+  grid-area: 1 / 1;
+}
+
+.bottom-x-corner {
+  grid-area: 1 / 1;
+  align-self: stretch;
+  justify-self: stretch;
+  width: 0.34em;
+  height: 0.34em;
+  border: 0 solid #a9a9a9;
+  transition: border-color 0.2s ease;
+  pointer-events: none;
+}
+
+.bottom-x:hover .bottom-x-corner,
+.bottom-x:focus-visible .bottom-x-corner {
+  border-color: #fff;
+}
+
+.bottom-x-corner--tl {
+  align-self: start;
+  justify-self: start;
+  border-top-width: 1px;
+  border-left-width: 1px;
+}
+
+.bottom-x-corner--tr {
+  align-self: start;
+  justify-self: end;
+  border-top-width: 1px;
+  border-right-width: 1px;
+}
+
+.bottom-x-corner--bl {
+  align-self: end;
+  justify-self: start;
+  border-bottom-width: 1px;
+  border-left-width: 1px;
+}
+
+.bottom-x-corner--br {
+  align-self: end;
+  justify-self: end;
+  border-bottom-width: 1px;
+  border-right-width: 1px;
+}
+
 .cross-field {
   position: absolute;
   inset: 0;

@@ -1,0 +1,167 @@
+diff --git a/src/App.css b/src/App.css
+--- a/src/App.css
++++ b/src/App.css
+@@ -1,9 +1,14 @@
++.page {
++  min-height: 100svh;
++  background: #000;
++}
++
+ .stage {
+   position: relative;
+   height: 100svh;
+   width: 100%;
+   overflow: hidden;
+-  touch-action: none;
++  touch-action: pan-y;
+   background-color: #000;
+   /* Aff frame: aspect 1024/320, fit 0.92 × view-scale (matches draw-wordmark) */
+   --aff-aspect: 3.2;
+@@ -11,6 +16,22 @@
+   --aff-h: calc(min(100vw / var(--aff-aspect), 100svh) * 0.92 * var(--aff-scale));
+ }
+ 
++.ascii-section {
++  display: flex;
++  justify-content: center;
++  padding: 300px 1rem 6rem;
++  background: #000;
++}
++
++.ascii-art {
++  margin: 0;
++  color: #fff;
++  font-family: "IBM Plex Mono", "Consolas", monospace;
++  font-size: clamp(0.6rem, 2.4vw, 1rem);
++  line-height: 1.2;
++  white-space: pre;
++}
++
+ @media (max-aspect-ratio: 1/1) {
+   .stage {
+     --aff-scale: 0.8;
+diff --git a/src/App.tsx b/src/App.tsx
+--- a/src/App.tsx
++++ b/src/App.tsx
+@@ -15,6 +15,13 @@ const PROMPT_HOLD_MS = 2800
+ const PROMPT_STRIKE_MS = 550
+ const PROMPT_CYCLES_BEFORE_PAUSE = 3
+ const PROMPT_PAUSE_MS = 9000
++const EYE_ART = `,adCCYba, 5b       d5  ,adCCYba,
++a8P_____88 \`8b     d8' f8P_____88
++8PP"""""""  \`3b   d8'  9PP"""""""
++"8b,   ,aa   \`8b,d8'   "8b,   ,ff
++ \`"Ybbd8"'     Y55'     \`"Ybbd8"'
++               d3'
++              d3'`
+ 
+ type Cross = {
+   id: number
+@@ -448,43 +455,51 @@ function App() {
+   }, [])
+ 
+   return (
+-    <main className="stage" ref={stageRef}>
+-      <SoundToggle on={soundOn} onToggle={toggleSound} />
+-
+-      <div className="cross-field cross-field--base" aria-hidden="true">
+-        <CrossMarks
+-          crosses={crosses}
+-          variant="base"
+-          onBreathEnd={handleBreathEnd}
++    <main className="page">
++      <section className="stage" ref={stageRef}>
++        <SoundToggle on={soundOn} onToggle={toggleSound} />
++
++        <div className="cross-field cross-field--base" aria-hidden="true">
++          <CrossMarks
++            crosses={crosses}
++            variant="base"
++            onBreathEnd={handleBreathEnd}
++          />
++        </div>
++
++        <AffChains />
++        <LoveAura />
++
++        <div
++          ref={wordmarkRef}
++          className={`wordmark${affHot ? ' is-hot' : ''}`}
++          role="img"
++          aria-label={WORD}
+         />
+-      </div>
+-
+-      <AffChains />
+-      <LoveAura />
+-
+-      <div
+-        ref={wordmarkRef}
+-        className={`wordmark${affHot ? ' is-hot' : ''}`}
+-        role="img"
+-        aria-label={WORD}
+-      />
+-
+-      <PromptLine />
+-
+-      <div
+-        className="cross-field cross-field--shadow"
+-        aria-hidden="true"
+-        style={
+-          wordMask
+-            ? {
+-                maskImage: `url(${wordMask})`,
+-                WebkitMaskImage: `url(${wordMask})`,
+-              }
+-            : undefined
+-        }
+-      >
+-        <CrossMarks crosses={crosses} variant="shadow" />
+-      </div>
++
++        <PromptLine />
++
++        <div
++          className="cross-field cross-field--shadow"
++          aria-hidden="true"
++          style={
++            wordMask
++              ? {
++                  maskImage: `url(${wordMask})`,
++                  WebkitMaskImage: `url(${wordMask})`,
++                }
++              : undefined
++          }
++        >
++          <CrossMarks crosses={crosses} variant="shadow" />
++        </div>
++      </section>
++
++      <section className="ascii-section">
++        <pre className="ascii-art" role="img" aria-label="Eye">
++          {EYE_ART}
++        </pre>
++      </section>
+     </main>
+   )
+ }
+diff --git a/src/index.css b/src/index.css
+--- a/src/index.css
++++ b/src/index.css
+@@ -41,14 +41,14 @@ html,
+ body,
+ #root {
+   margin: 0;
+-  height: 100%;
+-  overflow: hidden;
++  min-height: 100%;
+ }
+ 
+ body {
+   font-family: "IBM Plex Mono", "Consolas", monospace;
+   background: #000;
+   color: #e8e8e8;
++  overflow-x: hidden;
+   -webkit-font-smoothing: antialiased;
+   -moz-osx-font-smoothing: grayscale;
+ }
